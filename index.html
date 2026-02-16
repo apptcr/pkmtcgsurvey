@@ -65,7 +65,6 @@
 </div>
 
 <script>
-    // *** เปลี่ยน URL ตรงนี้เป็น URL ใหม่ที่ได้จากการ Deploy ล่าสุด ***
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyNmd8ke-mRfgS7SOpWk6gvhhpJBsv9Abd8O3zECMc7lIKUaq8uNLfRE_KOzaaka2f7/exec";
     
     const btn = document.getElementById('btn-interest');
@@ -85,7 +84,6 @@
         let ip = "Unknown";
         let loc = "Unknown";
 
-        // ใช้ API ที่รองรับ HTTPS และเสถียรกว่าสำหรับการดึง IP/Location
         try {
             const res = await fetch('https://ipapi.co/json/');
             const data = await res.json();
@@ -95,10 +93,8 @@
             console.error("Geo API Error:", e);
         }
 
-        // สร้าง URL สำหรับส่งข้อมูล (Query Strings)
         const finalUrl = `${SCRIPT_URL}?button_name=${encodeURIComponent('สนใจ')}&platform=${encodeURIComponent(navigator.platform)}&ip_address=${encodeURIComponent(ip)}&location=${encodeURIComponent(loc)}`;
 
-        // ส่งข้อมูลแบบ GET (วิธีนี้จะชัวร์กว่าในการส่งข้อมูลเข้า Apps Script เมื่อติดปัญหา CORS)
         fetch(finalUrl, { method: 'POST', mode: 'no-cors' })
         .then(() => {
             localStorage.setItem('hasSubmitted', 'true');
@@ -117,7 +113,6 @@
         location.reload();
     });
 </script>
-
 </body>
-
 </html>
+
