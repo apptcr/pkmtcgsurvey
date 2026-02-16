@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon Interest Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pk-yellow: #FFCB05;
+            --pk-blue: #2A75BB;
+            --pk-red: #EE1515;
+        }
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            border: 5px solid var(--pk-yellow);
+            max-width: 400px;
+            width: 90%;
+        }
+        .pokemon-ball { width: 80px; margin-bottom: 1rem; }
+        h1 { color: var(--pk-blue); margin-bottom: 1.5rem; }
+        button {
+            background-color: var(--pk-red);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+            box-shadow: 0 4px 0 #a30000;
+        }
+        button:hover { background-color: #ff4545; transform: scale(1.05); }
+        button:active { transform: translateY(4px); box-shadow: none; }
+        .hidden { display: none; }
+        .thank-you-msg { color: #2e7d32; font-weight: bold; font-size: 1.2rem; }
+        .admin-reset { margin-top: 25px; background-color: #6c757d; font-size: 0.8rem; padding: 8px 15px; opacity: 0.6; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Pok%C3%A9_Ball_icon.svg" class="pokemon-ball" alt="Pokeball">
+    <div id="action-section">
+        <h1>คุณสนใจรับข่าวสารไหม?</h1>
+        <button id="btn-interest">สนใจ</button>
+    </div>
+    <div id="thanks-section" class="hidden">
+        <h1 class="thank-you-msg">ขอบคุณที่แสดงความคิดเห็น!</h1>
+        <p>เราบันทึกข้อมูลของคุณเรียบร้อยแล้ว</p>
+        <button id="btn-reset" class="admin-reset">รีเซ็ตระบบ (สำหรับทดสอบ)</button>
+    </div>
+</div>
+
+<script>
+    // *** เปลี่ยน URL ตรงนี้เป็น URL ใหม่ที่ได้จากการ Deploy ล่าสุด ***
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyNmd8ke-mRfgS7SOpWk6gvhhpJBsv9Abd8O3zECMc7lIKUaq8uNLfRE_KOzaaka2f7/exec";
+    
+    const btn = document.getElementById('btn-interest');
+    const btnReset = document.getElementById('btn-reset');
+    const actionSection = document.getElementById('action-section');
+    const thanksSection = document.getElementById('thanks-section');
+
+    if (localStorage.getItem('hasSubmitted') === 'true') {
+        actionSection.classList.add('hidden');
+        thanksSection.classList.remove('hidden');
+    }
+
+    btn.addEventListener('click', async () => {
+        btn.innerText = "กำลังบันทึกข้อมูล...";
+        btn.disabled = true;
+
+        let ip = "Unknown";
+        let loc = "Unknown";
+
+        // ใช้ API ที่รองรับ HTTPS และเสถียรกว่าสำหรับการดึง IP/Location
+        try {
+            const res = await fetch('https://ipapi.co/json/');
+            const data = await res.json();
+            ip = data.ip || "Unknown";
+            loc = `${data.city || ''}, ${data.region || ''}` || "Unknown";
+        } catch (e) {
+            console.error("Geo API Error:", e);
+        }
+
+        // สร้าง URL สำหรับส่งข้อมูล (Query Strings)
+        const finalUrl = `${SCRIPT_URL}?button_name=${encodeURIComponent('สนใจ')}&platform=${encodeURIComponent(navigator.platform)}&ip_address=${encodeURIComponent(ip)}&location=${encodeURIComponent(loc)}`;
+
+        // ส่งข้อมูลแบบ GET (วิธีนี้จะชัวร์กว่าในการส่งข้อมูลเข้า Apps Script เมื่อติดปัญหา CORS)
+        fetch(finalUrl, { method: 'POST', mode: 'no-cors' })
+        .then(() => {
+            localStorage.setItem('hasSubmitted', 'true');
+            actionSection.classList.add('hidden');
+            thanksSection.classList.remove('hidden');
+        })
+        .catch(err => {
+            alert("เกิดข้อผิดพลาด กรุณาลองใหม่");
+            btn.innerText = "สนใจ";
+            btn.disabled = false;
+        });
+    });
+
+    btnReset.addEventListener('click', () => {
+        localStorage.removeItem('hasSubmitted');
+        location.reload();
+    });
+</script>
+
+</body>
+</html>
